@@ -1,5 +1,6 @@
 package kz.alitulegenov.creditdecisionengine.dto;
 
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -9,10 +10,12 @@ import java.math.BigDecimal;
 public record LoanDecisionRequest (
         @NotNull(message = "Indicate income")
         @Positive(message = "Income must be greater than zero")
+        @Digits(integer = 17, fraction = 2)
         BigDecimal income,
 
         @NotNull(message = "Indicate requested amount")
         @Positive(message = "Requested amount must be greater than zero")
+        @Digits(integer = 17, fraction = 2)
         BigDecimal requestedAmount,
 
         @NotNull(message = "Indicate term months")

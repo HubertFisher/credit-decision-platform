@@ -4,10 +4,9 @@ import jakarta.validation.Valid;
 import kz.alitulegenov.creditdecisionengine.dto.LoanDecisionRequest;
 import kz.alitulegenov.creditdecisionengine.dto.LoanDecisionResponse;
 import kz.alitulegenov.creditdecisionengine.service.LoanDecisionService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 
 @RestController
@@ -25,5 +24,8 @@ public class LoanDecisionController {
     ) {
         return loanDecisionService.makeDecision(loanDecisionRequest);
     }
-
+    @GetMapping("/{uuid}")
+    public LoanDecisionResponse getDecisions(@PathVariable UUID uuid){
+        return loanDecisionService.getLoanDecisionResponseById(uuid);
+    }
 }

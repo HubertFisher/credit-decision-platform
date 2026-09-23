@@ -1,3 +1,7 @@
+GET http://localhost:8080/api/decisions/35769526-d423-40e8-9d8c-09fec8120a0
+Accept: application/json
+
+###
 POST http://localhost:8080/api/decisions
 Content-Type: application/json
 
