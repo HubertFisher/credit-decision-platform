@@ -1,9 +1,9 @@
 package kz.alitulegenov.creditdecisionengine.controller;
 
+import jakarta.validation.Valid;
 import kz.alitulegenov.creditdecisionengine.dto.LoanDecisionRequest;
 import kz.alitulegenov.creditdecisionengine.dto.LoanDecisionResponse;
 import kz.alitulegenov.creditdecisionengine.service.LoanDecisionService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +21,7 @@ public class LoanDecisionController {
 
     @PostMapping
     public LoanDecisionResponse makeDecision(
-            @RequestBody LoanDecisionRequest loanDecisionRequest
+          @Valid @RequestBody LoanDecisionRequest loanDecisionRequest
     ) {
         return loanDecisionService.makeDecision(loanDecisionRequest);
     }

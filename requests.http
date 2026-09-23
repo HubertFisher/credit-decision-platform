@@ -2,7 +2,7 @@ POST http://localhost:8080/api/decisions
 Content-Type: application/json
 
 {
-  "income": 100000,
+  "income": -100000,
   "requestedAmount": 3000000,
   "termMonths": 24
 }
