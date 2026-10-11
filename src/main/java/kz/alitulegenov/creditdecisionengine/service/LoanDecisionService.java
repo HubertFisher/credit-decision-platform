@@ -24,12 +24,33 @@ public class LoanDecisionService {
     public LoanDecisionResponse makeDecision(LoanDecisionRequest request) {
        int risk = loanRiskCalculator.calculateRisk(request);
        boolean approved = risk < 50;
-       LoanDecision decision = loanDecisionRepository.save(new LoanDecision(request.income(), request.requestedAmount(), request.termMonths(), risk, approved));
-       return new LoanDecisionResponse(decision.getId(),decision.isApproved(), decision.getRiskScore());
+
+       LoanDecision decision = new LoanDecision(
+               request.income(),
+               request.requestedAmount(),
+               request.termMonths(),
+               risk,
+               approved
+
+       );
+       LoanDecision savedDecision = loanDecisionRepository.save(decision);
+       return new LoanDecisionResponse(
+               savedDecision.getId(),
+               savedDecision.isApproved(),
+               savedDecision.getRiskScore(),
+               savedDecision.getCreatedAt()
+       );
     }
 
     public LoanDecisionResponse getLoanDecisionResponseById(UUID id) {
-        LoanDecision loanDecision = loanDecisionRepository.findById(id).orElseThrow(()  -> new LoanDecisionNotFoundException(id));
-        return new LoanDecisionResponse(loanDecision.getId(),loanDecision.isApproved(), loanDecision.getRiskScore());
+        LoanDecision loanDecision = loanDecisionRepository.findById(id)
+                .orElseThrow(() -> new LoanDecisionNotFoundException(id));
+
+        return new LoanDecisionResponse(
+                loanDecision.getId(),
+                loanDecision.isApproved(),
+                loanDecision.getRiskScore(),
+                loanDecision.getCreatedAt()
+        );
     }
 }

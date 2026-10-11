@@ -1,9 +1,11 @@
 package kz.alitulegenov.creditdecisionengine.dto;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public record LoanDecisionResponse (
         UUID id,
         boolean approved,
-        int riskScore
+        int riskScore,
+        Instant createdAt
 ) {}
