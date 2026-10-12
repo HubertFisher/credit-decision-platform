@@ -1,4 +1,4 @@
-GET http://localhost:8080/api/decisions/e85a36a4-c688-4710-be0a-c89329a307ad
+GET http://localhost:8080/api/decisions?page=abc&size=20
 Accept: application/json
 
 ###
@@ -6,7 +6,7 @@ POST http://localhost:8080/api/decisions
 Content-Type: application/json
 
 {
-  "income": 100000,
+  "income": 1000000,
   "requestedAmount": 3000000,
   "termMonths": 24
 }

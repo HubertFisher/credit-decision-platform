@@ -7,6 +7,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +19,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidation(
             MethodArgumentNotValidException ex
-    ){
+    ) {
         Map<String, String> errors = new HashMap<>();
 
         for (FieldError fieldError
@@ -38,10 +40,50 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(apiError);
     }
 
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ApiError> handleMethodValidation(
+            HandlerMethodValidationException ex
+    ) {
+        Map<String, String> errors = new HashMap<>();
+        for (var result : ex.getParameterValidationResults()) {
+            String parameterName = result.getMethodParameter().getParameterName();
+            if (parameterName == null) {
+                parameterName = "parameter"
+                        + result.getMethodParameter().getParameterIndex();
+            }
+            for (var error : result.getResolvableErrors()) {
+                String message = error.getDefaultMessage();
+                errors.putIfAbsent(
+                        parameterName,
+                        message != null ? message : "Invalid value"
+                );
+            }
+        }
+
+        ApiError apiError = new ApiError(
+                400,
+                "Validation Failed",
+                errors
+        );
+        return ResponseEntity.badRequest().body(apiError);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex
+    ) {
+        ApiError apiError = new ApiError(
+                400,
+                "Invalid parameter",
+                Map.of(ex.getName(), "Invalid value type")
+        );
+        return ResponseEntity.badRequest().body(apiError);
+    }
+
     @ExceptionHandler(LoanDecisionNotFoundException.class)
     public ResponseEntity<ApiError> handleLoanDecisionNotFound(
             LoanDecisionNotFoundException ex
-    ){
+    ) {
         ApiError apiError = new ApiError(
                 404,
                 ex.getMessage(),
