@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 
-public record LoanDecisionRequest (
+public record LoanDecisionRequest(
         @NotNull(message = "Indicate income")
         @Positive(message = "Income must be greater than zero")
         @Digits(integer = 17, fraction = 2)

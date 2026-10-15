@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-public record LoanDecisionResponse (
+public record LoanDecisionResponse(
         UUID id,
         boolean approved,
         BigDecimal income,

@@ -1,17 +1,18 @@
 package kz.alitulegenov.creditdecisionengine.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import java.time.Instant;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 public class LoanDecision {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -34,13 +35,16 @@ public class LoanDecision {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
+    protected LoanDecision() {
+    }
 
-    protected LoanDecision() {}
-    public LoanDecision(BigDecimal income,
-                        BigDecimal requestedAmount,
-                        Integer termMonths,
-                        int riskScore,
-                        boolean approved ) {
+    public LoanDecision(
+            BigDecimal income,
+            BigDecimal requestedAmount,
+            Integer termMonths,
+            int riskScore,
+            boolean approved
+    ) {
         this.income = income;
         this.requestedAmount = requestedAmount;
         this.termMonths = termMonths;
@@ -48,20 +52,32 @@ public class LoanDecision {
         this.approved = approved;
         this.createdAt = Instant.now();
     }
-    public UUID getId() {return id;}
-    public BigDecimal getIncome() {return income;}
+
+    public UUID getId() {
+        return id;
+    }
+
+    public BigDecimal getIncome() {
+        return income;
+    }
+
     public BigDecimal getRequestedAmount() {
         return requestedAmount;
     }
+
     public Integer getTermMonths() {
         return termMonths;
     }
+
     public int getRiskScore() {
         return riskScore;
     }
+
     public boolean isApproved() {
         return approved;
     }
-    public Instant getCreatedAt() {return createdAt;}
 
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
 }

@@ -21,7 +21,10 @@ public class LoanDecisionService {
     private final LoanRiskCalculator loanRiskCalculator;
     private final LoanDecisionRepository loanDecisionRepository;
 
-    public LoanDecisionService(LoanRiskCalculator loanRiskCalculator, LoanDecisionRepository loanDecisionRepository) {
+    public LoanDecisionService(
+            LoanRiskCalculator loanRiskCalculator,
+            LoanDecisionRepository loanDecisionRepository
+    ) {
         this.loanRiskCalculator = loanRiskCalculator;
         this.loanDecisionRepository = loanDecisionRepository;
     }
