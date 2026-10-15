@@ -1,12 +1,54 @@
-GET http://localhost:8080/api/decisions?page=abc&size=20
-Accept: application/json
+@baseUrl = http://localhost:8080
+@decisionId = 00000000-0000-0000-0000-000000000000
 
-###
-POST http://localhost:8080/api/decisions
+### Create an approved decision (riskScore = 0)
+POST {{baseUrl}}/api/decisions
 Content-Type: application/json
+Accept: application/json
 
 {
   "income": 1000000,
   "requestedAmount": 3000000,
   "termMonths": 24
 }
+
+### Create a rejected decision (riskScore = 90)
+POST {{baseUrl}}/api/decisions
+Content-Type: application/json
+Accept: application/json
+
+{
+  "income": 250000,
+  "requestedAmount": 3000000,
+  "termMonths": 48
+}
+
+### Get a decision: replace decisionId above with an ID returned by POST
+GET {{baseUrl}}/api/decisions/{{decisionId}}
+Accept: application/json
+
+### Get the first page of decision history
+GET {{baseUrl}}/api/decisions?page=0&size=20
+Accept: application/json
+
+### Invalid request body: 400
+POST {{baseUrl}}/api/decisions
+Content-Type: application/json
+
+{
+  "income": 0,
+  "requestedAmount": -1,
+  "termMonths": 361
+}
+
+### Invalid page and size: 400
+GET {{baseUrl}}/api/decisions?page=-1&size=101
+Accept: application/json
+
+### Invalid parameter type: 400
+GET {{baseUrl}}/api/decisions?page=abc&size=20
+Accept: application/json
+
+### Missing decision: 404
+GET {{baseUrl}}/api/decisions/00000000-0000-0000-0000-000000000000
+Accept: application/json

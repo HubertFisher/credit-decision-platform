@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local configuration ###
+.env
+.env.*
+!.env.example
+
+### Local artifacts ###
+.DS_Store
+*.log
