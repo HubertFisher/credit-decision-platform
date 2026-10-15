@@ -9,13 +9,13 @@
 - История решений с пагинацией и сортировкой по времени создания и UUID.
 - Валидация входных данных и обработка ошибок.
 - Версионирование схемы БД через Flyway.
-- Unit-тесты правил риска и сервиса, тест запуска Spring-контекста с PostgreSQL.
+- Unit-тесты правил риска и сервиса, тест запуска Spring-контекста с PostgreSQL в Testcontainers.
 
 Текущая модель — упрощённые учебные правила. Авторизация, отдельный жизненный цикл заявки, Kafka и outbox относятся к дальнейшему развитию. API предназначен для локального запуска с тестовыми данными.
 
 ## Стек
 
-Java 21 · Spring Boot 4.1.1 · Spring Web MVC · Bean Validation · Spring Data JPA / Hibernate · PostgreSQL 16 · Flyway · Maven Wrapper · JUnit / Mockito · Docker Compose.
+Java 21 · Spring Boot 4.1.1 · Spring Web MVC · Bean Validation · Spring Data JPA / Hibernate · PostgreSQL 16 · Flyway · Maven Wrapper · JUnit / Mockito · Testcontainers · Docker Compose.
 
 ## Локальный запуск
 
@@ -53,7 +53,7 @@ Java 21 · Spring Boot 4.1.1 · Spring Web MVC · Bean Validation · Spring Data
 |---|---|
 | `DB_NAME` | `credit_decision` |
 | `DB_USERNAME` | `postgres` |
-| `DB_PASSWORD` | Обязательна; задаётся в `.env` или окружении |
+| `DB_PASSWORD` | Обязательна для обычного запуска приложения; задаётся в `.env` или окружении |
 | `DB_PORT` | `5432`, порт PostgreSQL на локальном компьютере |
 | `DB_URL` | Необязательно: полный JDBC URL вместо локального адреса |
 
@@ -181,14 +181,15 @@ src/test/java/                    тесты
 ./mvnw -Dtest=LoanRiskCalculatorTest,LoanDecisionServiceTest test
 ```
 
-Полная проверка и сборка JAR — с доступной БД из локальных настроек:
+Для полной проверки и сборки JAR нужен запущенный Docker:
 
 ```bash
-docker compose up -d --wait postgres
 ./mvnw verify
 ```
 
-Сейчас есть 8 тестов калькулятора, 5 тестов сервиса с Mockito и 1 тест запуска контекста. Последний подключается к PostgreSQL и запускает Flyway, поэтому для полного прогона нужна БД. Используйте локальную учебную или отдельную тестовую БД.
+Сейчас есть 8 тестов калькулятора, 5 тестов сервиса с Mockito и 1 тест запуска контекста. Для теста контекста Testcontainers автоматически запускает отдельный PostgreSQL 16, а Flyway применяет к нему миграции V1–V3. `@ServiceConnection` предоставляет настройки подключения; Spring управляет запуском и остановкой контейнера вместе с тестовым контекстом.
+
+Тесты работают без `.env`, переменных подключения к личной БД и ручного запуска PostgreSQL через Compose. Конфигурация контейнера находится только в тестовых исходниках и подключается через `@Import(TestcontainersConfiguration.class)`. При первом запуске Docker может загружать необходимые образы. Для обычного запуска приложения настройки `.env` и база из раздела «Локальный запуск» по-прежнему нужны.
 
 После сборки приложение можно запустить из корня репозитория:
 
@@ -196,7 +197,7 @@ docker compose up -d --wait postgres
 java -jar target/credit-decision-engine-0.0.1-SNAPSHOT.jar
 ```
 
-GitHub Actions запускает `./mvnw --batch-mode --no-transfer-progress verify` на Java 21 с отдельным PostgreSQL 16. Публикация и развёртывание workflow не выполняются.
+GitHub Actions запускает `./mvnw --batch-mode --no-transfer-progress verify` на Java 21. PostgreSQL 16 создаётся самим тестом через Testcontainers; отдельный сервис БД и параметры подключения в workflow не требуются. Публикация и развёртывание workflow не выполняются.
 
 ## Документация и план разработки
 
