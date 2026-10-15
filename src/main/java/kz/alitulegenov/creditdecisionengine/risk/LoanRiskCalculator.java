@@ -1,29 +1,43 @@
 package kz.alitulegenov.creditdecisionengine.risk;
 
-import kz.alitulegenov.creditdecisionengine.dto.LoanDecisionRequest;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Component
 public class LoanRiskCalculator {
 
-    public int calculateRisk(LoanDecisionRequest request) {
-        int riskScore = 0;
+    public ScoringResult calculateRisk(ScoringInput input) {
+        boolean lowIncome = input.monthlyIncome().compareTo(new BigDecimal(300000)) < 0;
 
-        if (request.requestedAmount()
-                .compareTo(request.income().multiply(BigDecimal.TEN)) > 0) {
-            riskScore += 40;
-        }
+        ScoringRuleResult incomeRule = new ScoringRuleResult(
+                ScoringRuleCode.LOW_INCOME,
+                lowIncome,
+                lowIncome ? 30 : 0
+        );
 
-        if (request.termMonths() > 36) {
-            riskScore += 20;
-        }
+        boolean longTerm = input.termMonths() > 36;
 
-        if (request.income().compareTo(new BigDecimal(300000)) < 0) {
-            riskScore += 30;
-        }
+        ScoringRuleResult termRule = new ScoringRuleResult(
+                ScoringRuleCode.LONG_TERM,
+                longTerm,
+                longTerm ? 20 : 0
+        );
 
-        return riskScore;
+        boolean amountIncomeRatioHigh = input.requestedAmount()
+                .compareTo(input.monthlyIncome().multiply(BigDecimal.TEN)) > 0;
+
+        ScoringRuleResult amountRule = new ScoringRuleResult(
+                ScoringRuleCode.AMOUNT_INCOME_RATIO_HIGH,
+                amountIncomeRatioHigh,
+                amountIncomeRatioHigh ? 40 : 0
+        );
+
+        return new ScoringResult(
+                "legacy-v1",
+                incomeRule.points() + termRule.points() + amountRule.points(),
+                List.of(amountRule, termRule, incomeRule)
+        );
     }
 }

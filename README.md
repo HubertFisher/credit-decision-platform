@@ -156,7 +156,9 @@ HTTP request → LoanDecisionController → LoanDecisionService
                                          └── LoanDecisionRepository → PostgreSQL
 ```
 
-Калькулятор вызывается сервисом; он не обращается к репозиторию. Исключения API обрабатывает `GlobalExceptionHandler`. DTO отделены от JPA-сущности.
+Сервис преобразует HTTP DTO `LoanDecisionRequest` в `ScoringInput` и передаёт его калькулятору. Калькулятор возвращает `ScoringResult`: метку политики `legacy-v1`, общий балл и `breakdown` с кодом, признаком срабатывания и вкладом каждого из трёх правил. Список результатов защищён от внешних изменений.
+
+Текущий REST API возвращает общий балл и итоговое решение; версия политики и breakdown используются внутри расчёта и пока не сохраняются в БД. Калькулятор не обращается к репозиторию. Исключения API обрабатывает `GlobalExceptionHandler`. DTO отделены от JPA-сущности.
 
 ```text
 src/main/java/kz/alitulegenov/creditdecisionengine/
@@ -187,7 +189,7 @@ src/test/java/                    тесты
 ./mvnw verify
 ```
 
-Сейчас есть 8 тестов калькулятора, 5 тестов сервиса с Mockito и 1 тест запуска контекста. Для теста контекста Testcontainers автоматически запускает отдельный PostgreSQL 16, а Flyway применяет к нему миграции V1–V3. `@ServiceConnection` предоставляет настройки подключения; Spring управляет запуском и остановкой контейнера вместе с тестовым контекстом.
+Unit-тесты покрывают граничные значения правил, версию и состав результата скоринга, неизменяемость breakdown, преобразование входных данных и поведение сервиса. Отдельный тест проверяет запуск Spring-контекста. Для теста контекста Testcontainers автоматически запускает отдельный PostgreSQL 16, а Flyway применяет к нему миграции V1–V3. `@ServiceConnection` предоставляет настройки подключения; Spring управляет запуском и остановкой контейнера вместе с тестовым контекстом.
 
 Тесты работают без `.env`, переменных подключения к личной БД и ручного запуска PostgreSQL через Compose. Конфигурация контейнера находится только в тестовых исходниках и подключается через `@Import(TestcontainersConfiguration.class)`. При первом запуске Docker может загружать необходимые образы. Для обычного запуска приложения настройки `.env` и база из раздела «Локальный запуск» по-прежнему нужны.
 
@@ -208,6 +210,6 @@ GitHub Actions запускает `./mvnw --batch-mode --no-transfer-progress ve
 
 ## Дальнейшее развитие
 
-Следующие этапы реализации: отдельная кредитная заявка и её состояния, версии правил и объяснения решения, идемпотентность, фоновая обработка, авторизация, transactional outbox и Kafka. Состав и порядок внедрения определены в плане разработки.
+Следующие этапы реализации: отдельная кредитная заявка и её состояния, хранение версии политики и объяснения решения, идемпотентность, фоновая обработка, авторизация, transactional outbox и Kafka. Состав и порядок внедрения определены в плане разработки.
 
 Справочные материалы по настройке: [Spring Boot external configuration](https://docs.spring.io/spring-boot/reference/features/external-config.html), [Docker Compose environment variables](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/), [GitHub Actions для Maven](https://docs.github.com/en/actions/tutorials/build-and-test-code/java-with-maven).

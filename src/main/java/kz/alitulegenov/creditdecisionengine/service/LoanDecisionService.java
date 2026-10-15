@@ -7,6 +7,8 @@ import kz.alitulegenov.creditdecisionengine.entity.LoanDecision;
 import kz.alitulegenov.creditdecisionengine.exception.LoanDecisionNotFoundException;
 import kz.alitulegenov.creditdecisionengine.repository.LoanDecisionRepository;
 import kz.alitulegenov.creditdecisionengine.risk.LoanRiskCalculator;
+import kz.alitulegenov.creditdecisionengine.risk.ScoringInput;
+import kz.alitulegenov.creditdecisionengine.risk.ScoringResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
@@ -30,14 +32,21 @@ public class LoanDecisionService {
     }
 
     public LoanDecisionResponse makeDecision(LoanDecisionRequest request) {
-        int risk = loanRiskCalculator.calculateRisk(request);
-        boolean approved = risk < 50;
+        ScoringInput input = new ScoringInput(
+                request.income(),
+                request.requestedAmount(),
+                request.termMonths()
+        );
+
+        ScoringResult result = loanRiskCalculator.calculateRisk(input);
+
+        boolean approved = result.riskScore() < 50;
 
         LoanDecision decision = new LoanDecision(
                 request.income(),
                 request.requestedAmount(),
                 request.termMonths(),
-                risk,
+                result.riskScore(),
                 approved
         );
 

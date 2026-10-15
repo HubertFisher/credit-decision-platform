@@ -7,6 +7,8 @@ import kz.alitulegenov.creditdecisionengine.entity.LoanDecision;
 import kz.alitulegenov.creditdecisionengine.exception.LoanDecisionNotFoundException;
 import kz.alitulegenov.creditdecisionengine.repository.LoanDecisionRepository;
 import kz.alitulegenov.creditdecisionengine.risk.LoanRiskCalculator;
+import kz.alitulegenov.creditdecisionengine.risk.ScoringInput;
+import kz.alitulegenov.creditdecisionengine.risk.ScoringResult;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Page;
@@ -103,11 +105,20 @@ public class LoanDecisionServiceTest {
 
         ReflectionTestUtils.setField(savedDecision, "id", uuid);
 
-        when(calculator.calculateRisk(request)).thenReturn(50);
+        ScoringInput expectedInput = new ScoringInput(
+                new BigDecimal("500000"),
+                new BigDecimal("3000000"),
+                24
+        );
+
+        when(calculator.calculateRisk(expectedInput))
+                .thenReturn(new ScoringResult("legacy-v1", 50, List.of()));
         when(repository.save(any(LoanDecision.class)))
                 .thenReturn(savedDecision);
 
         LoanDecisionResponse response = service.makeDecision(request);
+
+        verify(calculator).calculateRisk(expectedInput);
 
         ArgumentCaptor<LoanDecision> captor =
                 ArgumentCaptor.forClass(LoanDecision.class);
@@ -145,11 +156,20 @@ public class LoanDecisionServiceTest {
 
         ReflectionTestUtils.setField(savedDecision, "id", uuid);
 
-        when(calculator.calculateRisk(request)).thenReturn(49);
+        ScoringInput expectedInput = new ScoringInput(
+                new BigDecimal("500000"),
+                new BigDecimal("3000000"),
+                24
+        );
+
+        when(calculator.calculateRisk(expectedInput))
+                .thenReturn(new ScoringResult("legacy-v1", 49, List.of()));
         when(repository.save(any(LoanDecision.class)))
                 .thenReturn(savedDecision);
 
         LoanDecisionResponse response = service.makeDecision(request);
+
+        verify(calculator).calculateRisk(expectedInput);
 
         ArgumentCaptor<LoanDecision> captor =
                 ArgumentCaptor.forClass(LoanDecision.class);
@@ -211,8 +231,8 @@ public class LoanDecisionServiceTest {
         );
 
         assertEquals(1, response.items().size());
-        assertEquals(id, response.items().get(0).id());
-        assertEquals(decision.getIncome(), response.items().get(0).income());
+        assertEquals(id, response.items().getFirst().id());
+        assertEquals(decision.getIncome(), response.items().getFirst().income());
         assertEquals(1, response.page());
         assertEquals(3, response.size());
         assertEquals(4L, response.totalElements());
