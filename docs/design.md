@@ -24,7 +24,7 @@
 flowchart LR
   Client[Клиент] --> LOS[Основной бэкенд / LOS]
   BKI[Кредитное бюро / Госбазы] --> LOS
-  LOS -->|POST /api/v1/decisions| CDE[Credit Decision Engine]
+  LOS -->|POST /api/decisions| CDE[Credit Decision Engine]
   subgraph CDE [Credit Decision Engine — Decision Pipeline]
     API[REST API & Idempotency] --> Orchestrator[Decision Orchestrator]
     Orchestrator --> S1[1. Hard Stop Filter\nСтоп-факторы]
@@ -38,7 +38,7 @@ flowchart LR
 ```
 
 ### Входит в границы v1:
-- Синхронный приём запроса на принятие кредитного решения от основного бэка (`POST /api/v1/decisions`) с защитой идемпотентности (`requestId` / `Idempotency-Key`).
+- Синхронный приём запроса на принятие кредитного решения от основного бэка (`POST /api/decisions`) с защитой идемпотентности (`requestId`).
 - **Этап 1 (Knock-out / Hard Stop Filter):** отсечение по жёстким стоп-факторам (возраст заёмщика на момент подачи и погашения, наличие активной просрочки, глубокая историческая просрочка 90+ дней / NPL, критически низкий `creditScore`).
 - **Этап 2 (Risk-Based Pricing & Risk Grading):** присвоение риск-грейда (`A`, `B`, `C`, `D`, `REJECT`) по шкале `creditScore` ($300–850$), автоматическое назначение индивидуальной годовой процентной ставки (APR) и максимального лимита риска на заёмщика (Risk Exposure Cap).
 - **Этап 3 (Affordability / Оценка платёжеспособности):** двойной контроль доступного ежемесячного бюджета — одновременно по коэффициенту долговой нагрузки ($\text{DTI} \le 50\%$) и по остатку дохода не ниже прожиточного минимума ($\text{Subsistence Minimum}$).
@@ -189,8 +189,8 @@ $$\text{MaxAllowedTermByAge} = \min\big(\text{maxTermMonths}, (65 - \text{applic
 
 ```text
 kz.alitulegenov.creditdecisionengine
-├── controller               # REST API v1 и legacy-контроллер
-├── dto                      # Request/Response DTO, Problem Details / ApiError
+├── controller               # REST API (/api/decisions)
+├── dto                      # Request/Response DTO, ApiError
 ├── service                  # Сервисный слой, идемпотентность, транзакции
 ├── domain                   # Чистое ядро бизнес-логики (без зависимостей на Spring/JPA)
 │   ├── model                # DecisionInput, DecisionEvaluation, LoanOffer, PaymentSchedule
@@ -200,7 +200,7 @@ kz.alitulegenov.creditdecisionengine
 │   ├── affordability        # AffordabilityCalculator (DTI + Subsistence Minimum)
 │   ├── calculator           # DifferentiatedLoanCalculator (график и обратный расчёт)
 │   └── offer                # OfferMatrixGenerator и DecisionPipeline
-├── entity                   # JPA-сущности (CreditDecisionEntity и др.)
+├── entity                   # JPA-сущности
 ├── repository               # Spring Data JPA репозитории
 └── exception                # Исключения и GlobalExceptionHandler
 ```
@@ -209,7 +209,7 @@ kz.alitulegenov.creditdecisionengine
 
 ## 5. Схема хранения в PostgreSQL (Flyway V4)
 
-Существующие миграции `V1`–`V3` (таблица `loan_decision`) остаются без изменений. Новая миграция `V4__create_credit_decision_v2_table.sql` создаёт таблицу `credit_decision`:
+Существующие применённые миграции `V1`–`V3` не редактируются для сохранения контрольных сумм Flyway. Миграция `V4__replace_loan_decision_with_credit_decision.sql` удаляет устаревшую учебную таблицу `loan_decision` и создаёт актуальную таблицу `credit_decision`:
 
 | Колонка | Тип PostgreSQL | Ограничения | Назначение |
 |---|---|---|---|
@@ -240,9 +240,9 @@ kz.alitulegenov.creditdecisionengine
 
 ---
 
-## 6. Контракт REST API v1
+## 6. Контракт REST API
 
-### 6.1. `POST /api/v1/decisions` — Принятие кредитного решения
+### 6.1. `POST /api/decisions` — Принятие кредитного решения
 
 **Запрос:**
 ```json
@@ -311,7 +311,7 @@ kz.alitulegenov.creditdecisionengine
 }
 ```
 
-### 6.2. `GET /api/v1/decisions/{id}` и `GET /api/v1/decisions`
+### 6.2. `GET /api/decisions/{id}` и `GET /api/decisions`
 - Чтение сохранённого решения по `decisionId` (`200 OK` или `404 Not Found`).
 - Пагинированный список решений (`page`, `size`, сортировка `createdAt DESC, id DESC`).
 
@@ -326,4 +326,3 @@ kz.alitulegenov.creditdecisionengine
 | **ADR-003** | **Двойной критерий платёжеспособности (КДН + Прожиточный минимум)** | Защищает заёмщиков с невысоким доходом от ситуации, когда 50% дохода формально свободны, но оставшейся суммы недостаточно для базовых расходов. |
 | **ADR-004** | **Округление суммы до шага и проверка реальным графиком** | Исключает расхождение между аналитической формулой и фактическим помесячным графиком с округлением `HALF_EVEN`. |
 | **ADR-005** | **Матрица контр-офферов (сумма vs срок)** | Повышает конверсию в реальном бизнесе: клиенту, которому важна вся сумма, предлагается более длинный срок, а клиенту, которому важен короткий срок — доступная сумма. |
-| **ADR-006** | **Сохранение legacy API `/api/decisions` и миграций V1–V3** | Обеспечивает обратную совместимость и целостность истории Flyway при переходе на `/api/v1/decisions` и таблицу `credit_decision`. |

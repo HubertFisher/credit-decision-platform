@@ -6,11 +6,11 @@
 
 ---
 
-## Целевая архитектура конвейера решений (Decision Pipeline)
+## Архитектура конвейера решений (Decision Pipeline)
 
 ```text
 Основной бэкенд (LOS)
-   │  POST /api/v1/decisions (профиль заёмщика + данные БКИ + параметры кредита)
+   │  POST /api/decisions (профиль заёмщика + данные БКИ + параметры кредита)
    ▼
 [Idempotency Guard] ──(повтор requestId)──► Возврат сохранённого решения
    │
@@ -27,17 +27,6 @@
 ```
 
 Подробная математическая модель, таблицы грейдов и контракты описаны в [техническом дизайне](docs/design.md), а пошаговый порядок разработки — в [плане реализации](docs/development-plan.md).
-
----
-
-## Что уже реализовано в коде
-
-- Базовый синхронный REST API (`/api/decisions`): расчёт и сохранение решения в PostgreSQL, чтение по UUID, пагинированная история (`createdAt DESC, id DESC`).
-- Отделение модели расчёта (`ScoringInput`, `ScoringResult`, `ScoringRuleResult`, `ScoringRuleCode`) от HTTP DTO.
-- Валидация входных данных и централизованная обработка ошибок (`GlobalExceptionHandler`, `ApiError`).
-- Управление схемой БД через Flyway (`V1`–`V3`).
-- Изолированные unit-тесты и интеграционный тест контекста через Testcontainers (`postgres:16-alpine`).
-- CI-пайплайн в GitHub Actions (`./mvnw verify`).
 
 ---
 
@@ -85,35 +74,19 @@ docker compose down
 
 ---
 
-## Существующий Legacy API (`/api/decisions`)
-
-На период поэтапной разработки нового конвейера (`/api/v1/decisions`) в проекте сохранён исходный эндпоинт `/api/decisions`:
+## REST API (`/api/decisions`)
 
 | Метод | Путь | Результат |
 |---|---|---|
-| `POST` | `/api/decisions` | Рассчитать и сохранить решение (`200 OK`) |
+| `POST` | `/api/decisions` | Рассчитать и сохранить кредитное решение (`200 OK`) |
 | `GET` | `/api/decisions/{uuid}` | Получить решение по ID (`200 OK` / `404 Not Found`) |
 | `GET` | `/api/decisions?page=0&size=20` | Получить страницу истории (`200 OK`) |
-
-Пример запроса:
-```bash
-curl -X POST http://localhost:8080/api/decisions \
-  -H 'Content-Type: application/json' \
-  -d '{"income":1000000,"requestedAmount":3000000,"termMonths":24}'
-```
-
-Готовые примеры запросов доступны в [requests.http](requests.http).
 
 ---
 
 ## Тесты и сборка
 
-Запуск быстрых unit-тестов (без Docker и БД):
-```bash
-./mvnw -Dtest=LoanRiskCalculatorTest,LoanDecisionServiceTest test
-```
-
-Полная проверка (включая интеграционный тест с PostgreSQL 16 в Testcontainers) и сборка JAR (требуется запущенный Docker):
+Полная проверка (включая unit-тесты и интеграционный тест с PostgreSQL 16 в Testcontainers) и сборка JAR (требуется запущенный Docker):
 ```bash
 ./mvnw verify
 ```
@@ -122,5 +95,5 @@ curl -X POST http://localhost:8080/api/decisions \
 
 ## Документация проекта
 
-- [Технический дизайн (v3.0)](docs/design.md) — 5-стадийный конвейер принятия решений, Risk-Based Pricing, формулы КДН и прожиточного минимума, дифференцированный график, матрица контр-офферов, схема БД и контракты `/api/v1/decisions`.
+- [Технический дизайн (v3.0)](docs/design.md) — 5-стадийный конвейер принятия решений, Risk-Based Pricing, формулы КДН и прожиточного минимума, дифференцированный график, матрица контр-офферов, схема БД и контракты `/api/decisions`.
 - [План реализации](docs/development-plan.md) — разбивка разработки на 6 последовательных этапов с критериями готовности.
