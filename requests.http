@@ -1,54 +1,78 @@
-@baseUrl = http://localhost:8080
-@decisionId = 00000000-0000-0000-0000-000000000000
-
-### Create an approved decision (riskScore = 0)
-POST {{baseUrl}}/api/decisions
-Content-Type: application/json
-Accept: application/json
-
-{
-  "income": 1000000,
-  "requestedAmount": 3000000,
-  "termMonths": 24
-}
-
-### Create a rejected decision (riskScore = 90)
-POST {{baseUrl}}/api/decisions
-Content-Type: application/json
-Accept: application/json
-
-{
-  "income": 250000,
-  "requestedAmount": 3000000,
-  "termMonths": 48
-}
-
-### Get a decision: replace decisionId above with an ID returned by POST
-GET {{baseUrl}}/api/decisions/{{decisionId}}
-Accept: application/json
-
-### Get the first page of decision history
-GET {{baseUrl}}/api/decisions?page=0&size=20
-Accept: application/json
-
-### Invalid request body: 400
-POST {{baseUrl}}/api/decisions
+### 1. Полное одобрение (APPROVED — Grade A, 16% годовых)
+POST http://localhost:8080/api/decisions
 Content-Type: application/json
 
 {
-  "income": 0,
-  "requestedAmount": -1,
-  "termMonths": 361
+  "requestId": "11111111-2222-3333-4444-555555555501",
+  "applicantAgeYears": 32,
+  "monthlyIncome": 500000.00,
+  "existingMonthlyPayments": 50000.00,
+  "creditScore": 780,
+  "hasActiveDelinquency": false,
+  "maxDelinquencyDaysLast12Months": 0,
+  "requestedAmount": 2000000.00,
+  "requestedTermMonths": 24
 }
 
-### Invalid page and size: 400
-GET {{baseUrl}}/api/decisions?page=-1&size=101
+### 2. Умный контр-оффер (COUNTER_OFFER — Вариант А со снижением суммы + Вариант Б с увеличением срока)
+POST http://localhost:8080/api/decisions
+Content-Type: application/json
+
+{
+  "requestId": "11111111-2222-3333-4444-555555555502",
+  "applicantAgeYears": 32,
+  "monthlyIncome": 450000.00,
+  "existingMonthlyPayments": 80000.00,
+  "creditScore": 710,
+  "hasActiveDelinquency": false,
+  "maxDelinquencyDaysLast12Months": 0,
+  "requestedAmount": 3000000.00,
+  "requestedTermMonths": 12
+}
+
+### 3. Отказ по стоп-факторам (REJECTED — активная просрочка и низкий балл)
+POST http://localhost:8080/api/decisions
+Content-Type: application/json
+
+{
+  "requestId": "11111111-2222-3333-4444-555555555503",
+  "applicantAgeYears": 25,
+  "monthlyIncome": 600000.00,
+  "existingMonthlyPayments": 0.00,
+  "creditScore": 480,
+  "hasActiveDelinquency": true,
+  "maxDelinquencyDaysLast12Months": 45,
+  "requestedAmount": 1000000.00,
+  "requestedTermMonths": 12
+}
+
+### 4. Проверка идемпотентности (повтор requestId из Запроса №1 возвращает тот же decisionId)
+POST http://localhost:8080/api/decisions
+Content-Type: application/json
+
+{
+  "requestId": "11111111-2222-3333-4444-555555555501",
+  "applicantAgeYears": 32,
+  "monthlyIncome": 500000.00,
+  "existingMonthlyPayments": 50000.00,
+  "creditScore": 780,
+  "hasActiveDelinquency": false,
+  "maxDelinquencyDaysLast12Months": 0,
+  "requestedAmount": 2000000.00,
+  "requestedTermMonths": 24
+}
+
+### 5. История решений с пагинацией
+GET http://localhost:8080/api/decisions?page=0&size=20
 Accept: application/json
 
-### Invalid parameter type: 400
-GET {{baseUrl}}/api/decisions?page=abc&size=20
-Accept: application/json
+### 6. Ошибка валидации (400 Bad Request)
+POST http://localhost:8080/api/decisions
+Content-Type: application/json
 
-### Missing decision: 404
-GET {{baseUrl}}/api/decisions/00000000-0000-0000-0000-000000000000
-Accept: application/json
+{
+  "applicantAgeYears": 16,
+  "monthlyIncome": -100,
+  "creditScore": 950,
+  "requestedTermMonths": 3
+}
