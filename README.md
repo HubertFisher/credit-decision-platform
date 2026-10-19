@@ -119,3 +119,9 @@ Run the full verification suite (36 tests, including the Spring Boot context int
 
 - [Technical Design](docs/design.md) — pipeline architecture, risk-grade pricing tiers, annuity and DTI math, database schema, and JSON payloads.
 - [Development Plan](docs/development-plan.md) — implementation roadmap and verification criteria.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
