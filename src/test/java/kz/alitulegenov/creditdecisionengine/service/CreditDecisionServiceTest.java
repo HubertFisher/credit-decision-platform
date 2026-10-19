@@ -23,7 +23,7 @@ import kz.alitulegenov.creditdecisionengine.domain.policy.RiskGrade;
 import kz.alitulegenov.creditdecisionengine.dto.CreditDecisionRequest;
 import kz.alitulegenov.creditdecisionengine.dto.CreditDecisionResponse;
 import kz.alitulegenov.creditdecisionengine.entity.CreditDecision;
-import kz.alitulegenov.creditdecisionengine.exception.LoanDecisionNotFoundException;
+import kz.alitulegenov.creditdecisionengine.exception.CreditDecisionNotFoundException;
 import kz.alitulegenov.creditdecisionengine.repository.CreditDecisionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -105,7 +105,7 @@ class CreditDecisionServiceTest {
         UUID unknownId = UUID.randomUUID();
         when(repository.findById(unknownId)).thenReturn(Optional.empty());
 
-        assertThrows(LoanDecisionNotFoundException.class, () -> service.getById(unknownId));
+        assertThrows(CreditDecisionNotFoundException.class, () -> service.getById(unknownId));
     }
 
     private CreditDecisionRequest sampleRequest(UUID requestId) {

@@ -5,6 +5,7 @@ import java.util.Map;
 import kz.alitulegenov.creditdecisionengine.dto.ApiError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -75,8 +76,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(apiError);
     }
 
-    @ExceptionHandler(LoanDecisionNotFoundException.class)
-    public ResponseEntity<ApiError> handleLoanDecisionNotFound(LoanDecisionNotFoundException ex) {
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleMalformedJson(HttpMessageNotReadableException ex) {
+        ApiError apiError = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                "Malformed JSON request body",
+                Map.of()
+        );
+        return ResponseEntity.badRequest().body(apiError);
+    }
+
+    @ExceptionHandler(CreditDecisionNotFoundException.class)
+    public ResponseEntity<ApiError> handleCreditDecisionNotFound(CreditDecisionNotFoundException ex) {
         ApiError apiError = new ApiError(
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage(),

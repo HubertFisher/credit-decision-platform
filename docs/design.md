@@ -152,7 +152,7 @@ kz.alitulegenov.creditdecisionengine
 │   └── offer                # DecisionPipeline
 ├── entity                   # CreditDecision (immutable JPA entity with JSONB columns)
 ├── repository               # CreditDecisionRepository
-└── exception                # LoanDecisionNotFoundException, GlobalExceptionHandler
+└── exception                # CreditDecisionNotFoundException, GlobalExceptionHandler
 ```
 
 ---

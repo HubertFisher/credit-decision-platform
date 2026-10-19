@@ -11,7 +11,7 @@ import kz.alitulegenov.creditdecisionengine.dto.CreditDecisionPageResponse;
 import kz.alitulegenov.creditdecisionengine.dto.CreditDecisionRequest;
 import kz.alitulegenov.creditdecisionengine.dto.CreditDecisionResponse;
 import kz.alitulegenov.creditdecisionengine.entity.CreditDecision;
-import kz.alitulegenov.creditdecisionengine.exception.LoanDecisionNotFoundException;
+import kz.alitulegenov.creditdecisionengine.exception.CreditDecisionNotFoundException;
 import kz.alitulegenov.creditdecisionengine.repository.CreditDecisionRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -103,7 +103,7 @@ public class CreditDecisionService {
     public CreditDecisionResponse getById(UUID id) {
         Objects.requireNonNull(id, "id must not be null");
         CreditDecision decision = repository.findById(id)
-            .orElseThrow(() -> new LoanDecisionNotFoundException(id));
+            .orElseThrow(() -> new CreditDecisionNotFoundException(id));
         return toResponse(decision);
     }
 

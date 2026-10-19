@@ -12,7 +12,7 @@
     <artifactId>credit-decision-engine</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>credit-decision-engine</name>
-    <description>Educational REST API for credit risk assessment and decision history</description>
+    <description>Commercial FinTech microservice for automated annuity credit decisioning, risk-based pricing, and solvency evaluation</description>
     <properties>
         <java.version>21</java.version>
     </properties>
