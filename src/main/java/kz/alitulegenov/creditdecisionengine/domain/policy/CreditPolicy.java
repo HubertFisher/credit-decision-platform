@@ -17,7 +17,7 @@ import java.util.Objects;
  * @param maxAgeAtMaturity          maximum eligible applicant age in years at loan maturity
  * @param maxAllowedDelinquencyDays maximum tolerated historical delinquency in days over the past 12 months
  * @param minCreditScore            minimum external credit bureau score required to pass hard-stop screening
- * @param maxDtiRatio               maximum allowed Debt-to-Income (DTI / КДН) ratio as a decimal fraction (e.g. 0.50)
+ * @param maxDtiRatio               maximum allowed Debt-to-Income (DTI) ratio as a decimal fraction (e.g. 0.50)
  * @param subsistenceMinimum        statutory minimum monthly living allowance that must remain after all debt payments
  */
 public record CreditPolicy(

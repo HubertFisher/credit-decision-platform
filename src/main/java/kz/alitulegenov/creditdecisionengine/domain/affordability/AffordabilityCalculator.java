@@ -16,9 +16,9 @@ import org.springframework.stereotype.Component;
  * <p>Determines the borrower's maximum available monthly payment budget for a new loan by
  * enforcing two independent solvency limits simultaneously:
  * <ol>
- *   <li><b>Regulatory Debt-to-Income (DTI / КДН) ceiling:</b>
+ *   <li><b>Regulatory Debt-to-Income (DTI) ceiling:</b>
  *       {@code dtiBudget = (monthlyIncome * maxDtiRatio) - existingMonthlyPayments}</li>
- *   <li><b>Subsistence Minimum (Прожиточный минимум) protection:</b>
+ *   <li><b>Subsistence Minimum protection:</b>
  *       {@code subsistenceBudget = monthlyIncome - subsistenceMinimum - existingMonthlyPayments}</li>
  * </ol>
  *

@@ -1,4 +1,4 @@
-### 1. Полное одобрение (APPROVED — Grade A, 16% годовых)
+### 1. Direct Approval (APPROVED — Grade A, 16.0% APR)
 POST http://localhost:8080/api/decisions
 Content-Type: application/json
 
@@ -14,7 +14,7 @@ Content-Type: application/json
   "requestedTermMonths": 24
 }
 
-### 2. Умный контр-оффер (COUNTER_OFFER — Вариант А со снижением суммы + Вариант Б с увеличением срока)
+### 2. Smart Counter-Offer Matrix (COUNTER_OFFER — Option A: reduced amount on same term + Option B: full amount on extended term)
 POST http://localhost:8080/api/decisions
 Content-Type: application/json
 
@@ -30,7 +30,7 @@ Content-Type: application/json
   "requestedTermMonths": 12
 }
 
-### 3. Отказ по стоп-факторам (REJECTED — активная просрочка и низкий балл)
+### 3. Hard-Stop Rejection (REJECTED — active delinquency, severe historical delinquency, and credit score below 520)
 POST http://localhost:8080/api/decisions
 Content-Type: application/json
 
@@ -46,7 +46,7 @@ Content-Type: application/json
   "requestedTermMonths": 12
 }
 
-### 4. Проверка идемпотентности (повтор requestId из Запроса №1 возвращает тот же decisionId)
+### 4. Idempotency Replay Check (repeating requestId from Request #1 returns the exact same decision record)
 POST http://localhost:8080/api/decisions
 Content-Type: application/json
 
@@ -62,11 +62,11 @@ Content-Type: application/json
   "requestedTermMonths": 24
 }
 
-### 5. История решений с пагинацией
+### 5. Paginated Decision Audit History
 GET http://localhost:8080/api/decisions?page=0&size=20
 Accept: application/json
 
-### 6. Ошибка валидации (400 Bad Request)
+### 6. Validation Error Example (400 Bad Request)
 POST http://localhost:8080/api/decisions
 Content-Type: application/json
 
