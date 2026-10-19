@@ -116,8 +116,8 @@ For an annuity loan of term $N$ months and nominal annual interest rate $R$:
 1. **Monthly Interest Rate:** $r = \frac{R}{12}$ (computed using `MathContext.DECIMAL128`).
 2. **Annuity Factor:**
    $$K = \frac{r \times (1 + r)^N}{(1 + r)^N - 1}$$
-3. **Fixed Monthly Installment:**
-   $$\text{PMT} = \text{round}(S \times K, 2, \text{HALF\_EVEN})$$
+3. **Fixed Monthly Installment** (rounded to 2 decimal places using `RoundingMode.HALF_EVEN`):
+   $$\text{PMT} = \text{round}(S \times K, 2)$$
 4. **Reverse Maximum Affordable Principal $S_{\max}(N, R)$:**
    - Theoretical upper bound: $S_{\text{raw}} = \lfloor \text{AvailableMonthlyBudget} / K \rfloor$.
    - Cap by risk grade and product maximum: $S_{\text{capped}} = \min(S_{\text{raw}}, \text{riskExposureCap}, \text{maxProductAmount})$.
